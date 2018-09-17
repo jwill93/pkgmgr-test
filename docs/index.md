@@ -25,7 +25,11 @@ command as opposed to being installed implicitly, as a dependency).  In the real
 reflect, exactly, which packages were currently actually installed on the filesystem.</p>
 </dd>
 <dt><a href="#Package">Package</a></dt>
-<dd></dd>
+<dd><p>Represents a package which PackageManager knows about from processing either a DEPENDS or INSTALL command.  The
+existence of a Package object does not mean that it&#39;s currently installed.  It does mean that it&#39;s currently
+cached by PackageManager.  Packages hold references to their dependency Packages and to Packages which depend
+on them.</p>
+</dd>
 <dt><a href="#PackageFactory">PackageFactory</a></dt>
 <dd><p>A factory which ensures that we never instantiate more than one Package with the same name (presumably
 referring to the same piece of software).  As such, PackageFactory.getPackage() is the only way users should
@@ -242,6 +246,11 @@ Sets the specified Package's protectFromImplicitRemoval flag to the specified va
 <a name="Package"></a>
 
 ## Package
+Represents a package which PackageManager knows about from processing either a DEPENDS or INSTALL command.  The
+existence of a Package object does not mean that it's currently installed.  It does mean that it's currently
+cached by PackageManager.  Packages hold references to their dependency Packages and to Packages which depend
+on them.
+
 **Kind**: global class  
 
 * [Package](#Package)
@@ -253,11 +262,7 @@ Sets the specified Package's protectFromImplicitRemoval flag to the specified va
 <a name="new_Package_new"></a>
 
 ### new Package(name)
-Represents a package and tracks its dependencies and dependent packages.  The existence of a Package object
-does not mean that it's currently installed.  It does mean that it's currently cached.  This package manager
-"learns" about the existence of packages (and then caches them) in on of two ways: on a DEPENDS command
-(which PackageManager.specifyPackageDependencies() processes), or on an INSTALL command (which
-PackageManager.installPackage() processes).
+Construct a Package.
 
 
 | Param | Type | Description |
@@ -267,7 +272,7 @@ PackageManager.installPackage() processes).
 <a name="Package+name"></a>
 
 ### package.name
-The package's name
+The package's name.
 
 **Kind**: instance property of [<code>Package</code>](#Package)  
 <a name="Package+dependencyPackages"></a>
