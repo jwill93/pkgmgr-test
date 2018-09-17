@@ -1,0 +1,14 @@
+{
+  "name": "rival-pkgmgr",
+  "version": "1.0.0",
+  "description": "Package manager for Rival coding test",
+  "main": "pkgmgr.js",
+  "scripts": {
+    "test": "test"
+  },
+  "author": "avocado876@gmail.com",
+  "license": "ISC",
+  "dependencies": {
+    "commander": "^2.18.0"
+  }
+}
