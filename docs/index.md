@@ -1,13 +1,36 @@
 ## Classes
 
 <dl>
+<dt><a href="#InstallAttemptResult">InstallAttemptResult</a></dt>
+<dd><p>An array of InstallAttemptResults is returned by PackageManager.installPackage. They do not affect the
+operation of the PackageManager; they exist only to notify users of the outcomes of calls to installPackage.
+A call to installPackage can result in one of two outcomes (for the package itself and for its dependencies):
+either the Package was installed, or it wasn&#39;t because it had already been installed previously (either
+explicitly by a user call to INSTALL, or implicitly, as a dependency).</p>
+</dd>
+<dt><a href="#RemoveAttemptResult">RemoveAttemptResult</a></dt>
+<dd><p>An array of RemoveAttemptResults is returned by PackageManager.removePackage. They do not affect the
+operation of the PackageManager; they exist only to notify users of the outcomes of calls to removePackage.
+A call to removePackage can result in one of three outcomes (for the package itself and for its dependencies): 1)
+the package was removed; 2) the package was not removed because it was not installed to begin with; 3) the package
+was not removed because it is still needed as a dependency of other packages.</p>
+</dd>
+<dt><a href="#PackageInstaller">PackageInstaller</a></dt>
+<dd><p>This class is a stub, partly; it is meant to be the interface through which the PackageManager installs a Package
+to the filesystem (installToFilesystem()), or remove it from the filesystem (removeFromFilesystem()).  Since this
+is not a real-world package manager, ofc we don&#39;t do that here.  This class does have &quot;real&quot; functionality though:
+its _installedPackagesMap field, a Map of containing all currently installed packages.  (It also contains information
+about how the Package was installed, specifically, if it&#39;s ever been installed explicitly, that is, via an INSTALL
+command as opposed to being installed implicitly, as a dependency).  In the real world, this Map would always
+reflect, exactly, which packages were currently actually installed on the filesystem.</p>
+</dd>
+<dt><a href="#Package">Package</a></dt>
+<dd></dd>
 <dt><a href="#PackageFactory">PackageFactory</a></dt>
 <dd><p>A factory which ensures that we never instantiate more than one Package with the same name (presumably
 referring to the same piece of software).  As such, PackageFactory.getPackage() is the only way users should
 instantiate Packages.</p>
 </dd>
-<dt><a href="#Package">Package</a></dt>
-<dd></dd>
 <dt><a href="#PackageManager">PackageManager</a></dt>
 <dd><p>The guts of the package manager.  While pkgmgr.js parses input (via a file containing commands such as DEPEND,
 INSTALL, etc.) and writes output to the console, this class contains the actual logic determining how to respond
@@ -26,35 +49,195 @@ this were a &quot;real&quot; package manager.</p>
 </dd>
 </dl>
 
-## Functions
+<a name="InstallAttemptResult"></a>
 
-<dl>
-<dt><a href="#argsLengthCheck">argsLengthCheck(command, commandElements, minLength, exact)</a></dt>
-<dd><p>Validation method for user input; throws Error on validation failure</p>
-</dd>
-</dl>
-
-<a name="PackageFactory"></a>
-
-## PackageFactory
-A factory which ensures that we never instantiate more than one Package with the same name (presumably
-referring to the same piece of software).  As such, PackageFactory.getPackage() is the only way users should
-instantiate Packages.
+## InstallAttemptResult
+An array of InstallAttemptResults is returned by PackageManager.installPackage. They do not affect the
+operation of the PackageManager; they exist only to notify users of the outcomes of calls to installPackage.
+A call to installPackage can result in one of two outcomes (for the package itself and for its dependencies):
+either the Package was installed, or it wasn't because it had already been installed previously (either
+explicitly by a user call to INSTALL, or implicitly, as a dependency).
 
 **Kind**: global class  
-<a name="PackageFactory.getPackage"></a>
+<a name="new_InstallAttemptResult_new"></a>
 
-### PackageFactory.getPackage(name) ⇒ [<code>Package</code>](#Package)
-Return a Package instance with the specified name, either a newly constructed one or if this factory has
-already returned a Package with this name, that Package. Assuming users don't instantiate Packages directly,
-getting instances only via this method, it is guaranteed that users will not end up with two Packages which
-have the same name (and thus, preumably, refer to the same piece of software).
+### new InstallAttemptResult(packageName, previouslyInstalled)
+Construct an InstallAttemptResult.
 
-**Kind**: static method of [<code>PackageFactory</code>](#PackageFactory)  
+
+| Param | Description |
+| --- | --- |
+| packageName | The name of the Package |
+| previouslyInstalled | True if the package was already installed, false if it was not (and thus the   package was installed). |
+
+<a name="RemoveAttemptResult"></a>
+
+## RemoveAttemptResult
+An array of RemoveAttemptResults is returned by PackageManager.removePackage. They do not affect the
+operation of the PackageManager; they exist only to notify users of the outcomes of calls to removePackage.
+A call to removePackage can result in one of three outcomes (for the package itself and for its dependencies): 1)
+the package was removed; 2) the package was not removed because it was not installed to begin with; 3) the package
+was not removed because it is still needed as a dependency of other packages.
+
+**Kind**: global class  
+
+* [RemoveAttemptResult](#RemoveAttemptResult)
+    * [new RemoveAttemptResult(packageName, removedStatus)](#new_RemoveAttemptResult_new)
+    * [.REMOVED_STATUS_REMOVED](#RemoveAttemptResult.REMOVED_STATUS_REMOVED) ⇒ <code>symbol</code>
+    * [.REMOVED_STATUS_NOT_REMOVED_NOT_INSTALLED](#RemoveAttemptResult.REMOVED_STATUS_NOT_REMOVED_NOT_INSTALLED) ⇒ <code>symbol</code>
+    * [.REMOVED_STATUS_NOT_REMOVED_STILL_NEEDED](#RemoveAttemptResult.REMOVED_STATUS_NOT_REMOVED_STILL_NEEDED) ⇒ <code>symbol</code>
+
+<a name="new_RemoveAttemptResult_new"></a>
+
+### new RemoveAttemptResult(packageName, removedStatus)
+Construct a RemoveAttemptResult
+
 
 | Param | Type | Description |
 | --- | --- | --- |
-| name | <code>string</code> | The name of the Package |
+| packageName | <code>string</code> | The name of the package. |
+| removedStatus | <code>symbol</code> | One of the three RemoveAttemptResult.REMOVED_STATUS_* constants |
+
+<a name="RemoveAttemptResult.REMOVED_STATUS_REMOVED"></a>
+
+### RemoveAttemptResult.REMOVED_STATUS_REMOVED ⇒ <code>symbol</code>
+Status indicating the package was removed.
+
+**Kind**: static property of [<code>RemoveAttemptResult</code>](#RemoveAttemptResult)  
+<a name="RemoveAttemptResult.REMOVED_STATUS_NOT_REMOVED_NOT_INSTALLED"></a>
+
+### RemoveAttemptResult.REMOVED_STATUS_NOT_REMOVED_NOT_INSTALLED ⇒ <code>symbol</code>
+Status indicating the package was not removed because it wasn't currently installed.
+
+**Kind**: static property of [<code>RemoveAttemptResult</code>](#RemoveAttemptResult)  
+<a name="RemoveAttemptResult.REMOVED_STATUS_NOT_REMOVED_STILL_NEEDED"></a>
+
+### RemoveAttemptResult.REMOVED_STATUS_NOT_REMOVED_STILL_NEEDED ⇒ <code>symbol</code>
+Status indicating the package was not removed because it was still needed as a dependency of one or more
+packages.
+
+**Kind**: static property of [<code>RemoveAttemptResult</code>](#RemoveAttemptResult)  
+<a name="PackageInstaller"></a>
+
+## PackageInstaller
+This class is a stub, partly; it is meant to be the interface through which the PackageManager installs a Package
+to the filesystem (installToFilesystem()), or remove it from the filesystem (removeFromFilesystem()).  Since this
+is not a real-world package manager, ofc we don't do that here.  This class does have "real" functionality though:
+its _installedPackagesMap field, a Map of containing all currently installed packages.  (It also contains information
+about how the Package was installed, specifically, if it's ever been installed explicitly, that is, via an INSTALL
+command as opposed to being installed implicitly, as a dependency).  In the real world, this Map would always
+reflect, exactly, which packages were currently actually installed on the filesystem.
+
+**Kind**: global class  
+
+* [PackageInstaller](#PackageInstaller)
+    * [new PackageInstaller()](#new_PackageInstaller_new)
+    * [.installToFilesystem(pkg, protectFromImplicitRemoval)](#PackageInstaller+installToFilesystem)
+    * [.removeFromFilesystem(packageName)](#PackageInstaller+removeFromFilesystem)
+    * [.isPackageInstalled(packageName)](#PackageInstaller+isPackageInstalled) ⇒ <code>boolean</code>
+    * [.getInstalledPackage(packageName)](#PackageInstaller+getInstalledPackage) ⇒ [<code>Package</code>](#Package)
+    * [.getInstalledPackageNames()](#PackageInstaller+getInstalledPackageNames) ⇒ <code>Array.&lt;string&gt;</code>
+    * [.isPackageProtectedFromImplicitRemoval(packageName)](#PackageInstaller+isPackageProtectedFromImplicitRemoval) ⇒ <code>boolean</code>
+    * [.setPackageProtectedFromImplicitRemoval(packageName, protect)](#PackageInstaller+setPackageProtectedFromImplicitRemoval)
+
+<a name="new_PackageInstaller_new"></a>
+
+### new PackageInstaller()
+Construct a PackageInstaller.
+
+<a name="PackageInstaller+installToFilesystem"></a>
+
+### packageInstaller.installToFilesystem(pkg, protectFromImplicitRemoval)
+Install the pkg Package to the filesystem.
+
+**Kind**: instance method of [<code>PackageInstaller</code>](#PackageInstaller)  
+**Throw**: Error if the Package is already installed (call isPackageInstalled() first to avoid this error)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| pkg | [<code>Package</code>](#Package) | The Package to install. |
+| protectFromImplicitRemoval | <code>boolean</code> | True if this method call resulted from the user explicitly issuing    a command to install this package (e.g., INSTALL PACKAGENAME), false if the call resulted from the Package    being installed because it's a dependency of another Package. |
+
+<a name="PackageInstaller+removeFromFilesystem"></a>
+
+### packageInstaller.removeFromFilesystem(packageName)
+Remove the Package whose name is packageName from the filesystem.  Note that this method does not contain any
+logic to determine whether or not it's safe to remove this package (e.g., whether other Packages depend on it,
+etc.); all that logic shgould be in PackageManager.
+
+**Kind**: instance method of [<code>PackageInstaller</code>](#PackageInstaller)  
+**Throw**: Error if the Package was not installed (call isPackageInstalled() first to avoid this error)  
+
+| Param | Type |
+| --- | --- |
+| packageName | <code>string</code> | 
+
+<a name="PackageInstaller+isPackageInstalled"></a>
+
+### packageInstaller.isPackageInstalled(packageName) ⇒ <code>boolean</code>
+Returns true if a Package whose name is packageName is currently installed on the filesystem, false otherwise.
+
+**Kind**: instance method of [<code>PackageInstaller</code>](#PackageInstaller)  
+**Returns**: <code>boolean</code> - True if installed  
+
+| Param | Type |
+| --- | --- |
+| packageName | <code>string</code> | 
+
+<a name="PackageInstaller+getInstalledPackage"></a>
+
+### packageInstaller.getInstalledPackage(packageName) ⇒ [<code>Package</code>](#Package)
+Return the Package whose name is packageName.
+
+**Kind**: instance method of [<code>PackageInstaller</code>](#PackageInstaller)  
+**Returns**: [<code>Package</code>](#Package) - The Package.  
+**Throws**:
+
+- Error if the specified Package is not installed.
+
+
+| Param | Type |
+| --- | --- |
+| packageName | <code>string</code> | 
+
+<a name="PackageInstaller+getInstalledPackageNames"></a>
+
+### packageInstaller.getInstalledPackageNames() ⇒ <code>Array.&lt;string&gt;</code>
+Return an unsorted array of Package names which are currently installed.
+
+**Kind**: instance method of [<code>PackageInstaller</code>](#PackageInstaller)  
+**Returns**: <code>Array.&lt;string&gt;</code> - The Package names.  
+<a name="PackageInstaller+isPackageProtectedFromImplicitRemoval"></a>
+
+### packageInstaller.isPackageProtectedFromImplicitRemoval(packageName) ⇒ <code>boolean</code>
+Returns the specified Package's protectFromImplicitRemoval boolean.
+
+**Kind**: instance method of [<code>PackageInstaller</code>](#PackageInstaller)  
+**Returns**: <code>boolean</code> - True if Package's protectFromImplicitRemoval is true  
+**Throws**:
+
+- Error if the specified Package is not installed.
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| packageName | <code>string</code> | The name of the Package. |
+
+<a name="PackageInstaller+setPackageProtectedFromImplicitRemoval"></a>
+
+### packageInstaller.setPackageProtectedFromImplicitRemoval(packageName, protect)
+Sets the specified Package's protectFromImplicitRemoval flag to the specified value.
+
+**Kind**: instance method of [<code>PackageInstaller</code>](#PackageInstaller)  
+**Throws**:
+
+- Error if the specified Package is not installed.
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| packageName | <code>string</code> |  |
+| protect | <code>boolean</code> | True to mark the package protected from being removed except by explicit REMOVE command |
 
 <a name="Package"></a>
 
@@ -99,6 +282,28 @@ Packages which are dependencies of this package. Only PackageManager should ever
 Packages of which this package is a dependency. Only PackageManager should ever alter this Set.
 
 **Kind**: instance property of [<code>Package</code>](#Package)  
+<a name="PackageFactory"></a>
+
+## PackageFactory
+A factory which ensures that we never instantiate more than one Package with the same name (presumably
+referring to the same piece of software).  As such, PackageFactory.getPackage() is the only way users should
+instantiate Packages.
+
+**Kind**: global class  
+<a name="PackageFactory.getPackage"></a>
+
+### PackageFactory.getPackage(name) ⇒ [<code>Package</code>](#Package)
+Return a Package instance with the specified name, either a newly constructed one or if this factory has
+already returned a Package with this name, that Package. Assuming users don't instantiate Packages directly,
+getting instances only via this method, it is guaranteed that users will not end up with two Packages which
+have the same name (and thus, preumably, refer to the same piece of software).
+
+**Kind**: static method of [<code>PackageFactory</code>](#PackageFactory)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| name | <code>string</code> | The name of the Package |
+
 <a name="PackageManager"></a>
 
 ## PackageManager
@@ -124,8 +329,8 @@ this were a "real" package manager.
 
 * [PackageManager](#PackageManager)
     * [.specifyPackageDependencies(packageName, dependencyNamesArr)](#PackageManager+specifyPackageDependencies)
-    * [.installPackage(packageName)](#PackageManager+installPackage) ⇒ <code>Array.&lt;InstallAttemptResult&gt;</code>
-    * [.removePackage(packageName)](#PackageManager+removePackage) ⇒ <code>Array.&lt;RemoveAttemptResult&gt;</code>
+    * [.installPackage(packageName)](#PackageManager+installPackage) ⇒ [<code>Array.&lt;InstallAttemptResult&gt;</code>](#InstallAttemptResult)
+    * [.removePackage(packageName)](#PackageManager+removePackage) ⇒ [<code>Array.&lt;RemoveAttemptResult&gt;</code>](#RemoveAttemptResult)
     * [.listPackageNames()](#PackageManager+listPackageNames) ⇒
     * [.endCommands()](#PackageManager+endCommands)
 
@@ -147,7 +352,7 @@ dependencies.
 
 <a name="PackageManager+installPackage"></a>
 
-### packageManager.installPackage(packageName) ⇒ <code>Array.&lt;InstallAttemptResult&gt;</code>
+### packageManager.installPackage(packageName) ⇒ [<code>Array.&lt;InstallAttemptResult&gt;</code>](#InstallAttemptResult)
 Handle an INSTALL command.
 
 Install any of the package's dependencies that aren't already installed, then install the package if it's not
@@ -156,7 +361,7 @@ package). This is a recursive operation which involves (potential) recursive cal
 _installPkgAndDependencies().
 
 **Kind**: instance method of [<code>PackageManager</code>](#PackageManager)  
-**Returns**: <code>Array.&lt;InstallAttemptResult&gt;</code> - Array of InstallAttemptResults (indicating packageName and whether the package
+**Returns**: [<code>Array.&lt;InstallAttemptResult&gt;</code>](#InstallAttemptResult) - Array of InstallAttemptResults (indicating packageName and whether the package
 was installed, or not installed because it was already installed.  
 
 | Param | Type | Description |
@@ -165,7 +370,7 @@ was installed, or not installed because it was already installed.
 
 <a name="PackageManager+removePackage"></a>
 
-### packageManager.removePackage(packageName) ⇒ <code>Array.&lt;RemoveAttemptResult&gt;</code>
+### packageManager.removePackage(packageName) ⇒ [<code>Array.&lt;RemoveAttemptResult&gt;</code>](#RemoveAttemptResult)
 Handle a REMOVE command.
 
 Remove any of the package's dependencies which weren't explicitly installed and are not dependencies of other
@@ -173,7 +378,7 @@ packages, then remove the package if it's not a dependency of any other package.
 which involves (potential) recursive calls to the private method_removePkgAndDependencies().
 
 **Kind**: instance method of [<code>PackageManager</code>](#PackageManager)  
-**Returns**: <code>Array.&lt;RemoveAttemptResult&gt;</code> - Array of RemoveAttemptResults (indicating packageName and whether the package
+**Returns**: [<code>Array.&lt;RemoveAttemptResult&gt;</code>](#RemoveAttemptResult) - Array of RemoveAttemptResults (indicating packageName and whether the package
 was removed, or not removed because it's still needed as a dependency of another package, or not removed
 because it wasn't installed.  
 
@@ -198,22 +403,3 @@ Handle an END command.
 The only thing this method does is make sure END is only called once.
 
 **Kind**: instance method of [<code>PackageManager</code>](#PackageManager)  
-<a name="argsLengthCheck"></a>
-
-## argsLengthCheck(command, commandElements, minLength, exact)
-Validation method for user input; throws Error on validation failure
-
-**Kind**: global function  
-**Throws**:
-
-- Error on validation failure. The Error's message is meant to be meaningful to lay users and therefore to be
-  printed to the console
-
-
-| Param | Type | Description |
-| --- | --- | --- |
-| command | <code>string</code> | The command (first word of the line) |
-| commandElements | <code>Array.&lt;string&gt;</code> | All words following the command, as an array |
-| minLength | <code>number</code> | Minimum (or exact) number of words expected in commandElements |
-| exact | <code>boolean</code> | True to require exactly the number of words expected; false if we should treat the number   as a minimum (note: we don't do maximums in this validation method because validation needs here don't   call for it). |
-
